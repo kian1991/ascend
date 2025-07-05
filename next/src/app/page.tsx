@@ -1,12 +1,5 @@
-'use client';
-import LoginWithEmail from '@/components/auth/login-with-email';
-import { AuthWrapper } from '@/components/auth/ready-wrapper';
-import Image from 'next/image';
+import { SplashScreen } from '@/components/ui/splash-screen';
 
 export default function Home() {
-  return (
-    <main>
-      <AuthWrapper />
-    </main>
-  );
+  return <SplashScreen />;
 }

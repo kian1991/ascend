@@ -1,6 +1,5 @@
 import { usePrivy } from '@privy-io/react-auth';
 import LoginWithEmail from './login-with-email';
-import { log } from 'console';
 
 export function AuthWrapper() {
   const { ready, connectWallet, login, logout, user } = usePrivy();
