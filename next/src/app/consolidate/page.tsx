@@ -1,3 +1,4 @@
+'use client';
 import { ListAssets } from '../claim/_components/list-assets';
 import { Consolidate } from '../onboarding/components/consolidate';
 

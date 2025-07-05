@@ -9,6 +9,7 @@ import { CheckInInterval, useAscent, useAscentRegistry } from '@/service/smart-c
 import { ListAssets } from '@/app/claim/_components/list-assets';
 import { Consolidate } from './consolidate';
 import { ValidateBeneficiaries } from './validate-beneficiaries';
+import { useRouter } from 'next/navigation';
 
 const MAX_STEPS = 9;
 
@@ -16,6 +17,7 @@ export function ContractForm() {
     const [currentStep, setCurrentStep] = useState(1);
     const containerRef = useRef<HTMLDivElement>(null);
     const { user } = usePrivy();
+    const { push } = useRouter(); // Assuming you have a router to navigate after submission
     const { createAscent, isPending } = useAscentRegistry(); // Assuming useAscent is a custom hook for smart contract interactions
     const [formData, setFormData] = useState<{
         grantor: string;
@@ -77,13 +79,13 @@ export function ContractForm() {
 
     const handleSubmit = () => {
         console.log(formData);
-        createAscent(
-            formData.grantor as `0x${string}`, // Ensure grantor is a valid ETH address
-            formData.beneficiaries.map((b) => b.wallet as `0x${string}`),
-            formData.checkInInterval
-        );
+        // createAscent(
+        //     formData.grantor as `0x${string}`, // Ensure grantor is a valid ETH address
+        //     formData.beneficiaries.map((b) => b.wallet as `0x${string}`),
+        //     formData.checkInInterval
+        // );
         setTimeout(() => {
-            window.location.href = '/consolidate';
+            push('/consolidate'); //
         }, 2000); // Redirect after 2 seconds
     };
 
