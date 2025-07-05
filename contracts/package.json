@@ -12,7 +12,10 @@
     "viem": "^2.31.7"
   },
   "scripts": {
-    "set:scope": "npx hardhat run scripts/setScopeUserVerification.ts --network alfajores"
+    "set:scope": "npx hardhat run scripts/setScopeUserVerification.ts --network alfajores",
+    "set:mockData": "npx hardhat run scripts/setMockData.ts --network alfajores",
+    "test:UserVerification": "npx hardhat run scripts/test_contract.ts --network alfajores",
+    "deploy:UserVerification": "npx hardhat ignition deploy --network alfajores ignition/modules/UserVerificationModule.ts --reset"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.3.0",

@@ -3,8 +3,42 @@ import fs from "fs";
 import { getAddress } from "viem";
 import type { Address } from "viem";
 
+interface GenericDiscloseOutputV2 {
+    attestationId: `0x${string}`;
+    userIdentifier: bigint;
+    nullifier: bigint;
+    forbiddenCountriesListPacked: [bigint, bigint, bigint, bigint];
+    issuingState: string;
+    name: string[];
+    idNumber: string;
+    nationality: string;
+    dateOfBirth: string;
+    gender: string;
+    expiryDate: string;
+    olderThan: bigint;
+    ofac: [boolean, boolean, boolean];
+}
+
+function createEmptyOutputWithNullifier(nullifierValue: bigint): GenericDiscloseOutputV2 {
+    return {
+        attestationId: "0x0000000000000000000000000000000000000000000000000000000000000000",
+        userIdentifier: 0n,
+        nullifier: nullifierValue,
+        forbiddenCountriesListPacked: [0n, 0n, 0n, 0n],
+        issuingState: "",
+        name: [],
+        idNumber: "",
+        nationality: "",
+        dateOfBirth: "",
+        gender: "",
+        expiryDate: "",
+        olderThan: 0n,
+        ofac: [false, false, false]
+    };
+}
+
 async function main(): Promise<void> {
-    console.log("Setting scope for UserVerification contract...");
+    console.log("Testing UserVerification contract...");
 
     // Find contract address from deployment files
     const ignitionPath = "./ignition/deployments/chain-44787/deployed_addresses.json";
@@ -41,14 +75,14 @@ async function main(): Promise<void> {
         const { viem } = await network.connect();
         const contract = await viem.getContractAt("UserVerification", contractAddress);
         console.log("Contract instance read successfully");
-
-        console.log("\nReady to set scope - contract interface is available!");
-        const newScope = "14842765288887605560928378114150503536133902418256853525826726862142166364831";
-        console.log("Setting scope to:", newScope);
         
         try {
-            // Call setScope function directly on the contract
-            const tx = await contract.write.setScope([BigInt(newScope)]);
+            const nullifierValue = BigInt("0x115b67fef6957d3ea9ba60dcb906e5ea796d9b2d725b65f0ec83dac6e6d0aef5");
+            const emptyOutput = createEmptyOutputWithNullifier(nullifierValue);
+            const userData = `0xa783Dd4f1Aaa4BE8e8b0Cf70aE3E24e635dBC514` as const;
+
+            // Call addBeneficiaryData function with address and uint256[] array parameters
+            const tx = await contract.write.testCustomVerification([emptyOutput, userData]);
             console.log("Transaction hash:", tx);
 
             // Wait for transaction confirmation
@@ -57,14 +91,12 @@ async function main(): Promise<void> {
             const receipt = await publicClient.waitForTransactionReceipt({ hash: tx });
             console.log("Transaction confirmed in block:", receipt.blockNumber.toString());
 
-            // Verify the scope was updated
-            const updatedScope = await contract.read.scope();
-            console.log("Updated scope:", updatedScope.toString());
-
-            console.log("\nScope update complete!");
+            // Add a small delay to ensure state is fully updated
+            console.log("Waiting for state to update...");
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
 
         } catch (error: any) {
-            console.error("Failed to set scope:", error.message);
+            console.error("Failed to perform Test:", error.message);
             process.exit(1);
         }
 

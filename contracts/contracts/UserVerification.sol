@@ -20,61 +20,46 @@ contract UserVerification is SelfVerificationRoot {
     bytes32 public verificationConfigId;
     address public lastUserAddress;
 
-    //New
-    string public lastUserFirstName;
-    string public lastUserLastName;
-    string public lastUserDOB;
-
-    mapping (address => BeneficiaryInfo) beneficiaryData; 
-
     //Define Error
     error LogError(string[] namesArray);
-    error FirstNameMismatch(string expectedValue, string actualValue);
-    error LastNameMismatch(string expectedValue, string actualValue);
-    error DOBMismatch(string expectedValue, string actualValue);
+    error UserIdentifierMismatch(uint256 expectedValue, uint256 actualValue);
 
-    // Zusätzliche Debug-Fehler für verschiedene Typen
-    error LogString(string value);
-    error LogUint(uint256 value);
-    error LogAddress(address value);
-    error LogBytes(bytes value);
-    error LogBool(bool value);
+    // Added Information
+    uint256 public lastUserIdentifier;
+    
+    mapping (address => BeneficiaryInfo) beneficiaryData; 
 
     struct BeneficiaryInfo {
-        string beneficiaryFirstName;
-        string beneficiaryLastName;
-        string beneficiaryDOB;
+        uint256[] beneficiaryUserIdentifier;
     }
 
-    function verifyUserData() internal {
-        if (keccak256(abi.encodePacked(lastUserFirstName)) != keccak256(abi.encodePacked("TOM"))) {
-            revert FirstNameMismatch("TOM", lastUserFirstName);
-        }
-        
-        if (keccak256(abi.encodePacked(lastUserLastName)) != keccak256(abi.encodePacked("ALBRECHT"))) {
-            revert LastNameMismatch("ALBRECHT", lastUserLastName);
-        }
-        
-        if (keccak256(abi.encodePacked(lastUserDOB)) != keccak256(abi.encodePacked("01-01-00"))) {
-            revert DOBMismatch("01-01-00", lastUserDOB);
-        }
-    }
-
-    // Events for testing
-    event VerificationCompleted(
-        ISelfVerificationRoot.GenericDiscloseOutputV2 output,
-        bytes userData
+    // Added Events
+    event AddedBeneficiary(
+        address ascendAddress,
+        uint256[] beneficiaryUserIdentifiers
     );
 
-    event UserData(
-        string firstName,
-        string lastName,
-        string dob
+    event RemovedBeneficiaryUserIdentifier(
+        address ascendAddress,
+        uint256 beneficiaryUserIdentifier
+    );
+
+    event StringLogEvent(
+        string log    
     );
     
-    function getBeneficiaryData(address _address) public view returns (BeneficiaryInfo memory) {
-        return beneficiaryData[_address];
-    }
+    event ByteLogEvent(
+        bytes log    
+    );
+
+    event Uint256LogEvent(
+        uint256 log
+    );
+
+    event AddressParsingEvent(
+        address parsedAddress,
+        bytes originalUserData
+    );
 
     constructor(
         address identityVerificationHubV2Address,
@@ -82,6 +67,93 @@ contract UserVerification is SelfVerificationRoot {
         bytes32 _verificationConfigId
     ) SelfVerificationRoot(identityVerificationHubV2Address, scope) {
         verificationConfigId = _verificationConfigId;
+    }
+
+    //Helper Functions
+
+    function addBeneficiaryData(address _ascendAddress, uint256[] memory _beneficiaryUserIdentifiers) external {
+        for (uint256 j = 0; j < _beneficiaryUserIdentifiers.length; j++) {
+                beneficiaryData[_ascendAddress].beneficiaryUserIdentifier.push(_beneficiaryUserIdentifiers[j]);
+            }
+        emit AddedBeneficiary(_ascendAddress, _beneficiaryUserIdentifiers);
+    }
+
+    function addBeneficiaryDataBatch(
+        address[] calldata _ascendAddresses, 
+        uint256[][] calldata _beneficiaryUserIdentifiers
+    ) external {
+        require(_ascendAddresses.length == _beneficiaryUserIdentifiers.length, "Arrays length mismatch");
+        
+        for (uint256 i = 0; i < _ascendAddresses.length; i++) {
+            address addr = _ascendAddresses[i];
+            uint256[] calldata identifiers = _beneficiaryUserIdentifiers[i];
+            
+            for (uint256 j = 0; j < identifiers.length; j++) {
+                beneficiaryData[addr].beneficiaryUserIdentifier.push(identifiers[j]);
+            }
+            emit AddedBeneficiary(addr, identifiers);
+        }
+    }
+
+    function getBeneficiaryData(address _address) public view returns (BeneficiaryInfo memory) {
+        return beneficiaryData[_address];
+    }
+
+    /* Function which needs to be called from the smart contract that handles the releasing of the funds, 
+    once the funds have been released to the corresponding user. To make sure that no other beneficiary can claim using the same ZK Proof.
+    */
+    function removeBeneficiaryUserIdentifier(address _ascendAddress, uint256 _beneficiaryUserIdentifier) external {
+        uint256[] storage identifiers = beneficiaryData[_ascendAddress].beneficiaryUserIdentifier;
+        
+        // Find and remove the identifier
+        for (uint256 i = 0; i < identifiers.length; i++) {
+            if (identifiers[i] == _beneficiaryUserIdentifier) {
+                // Move the last element to the current position and remove the last element
+                identifiers[i] = identifiers[identifiers.length - 1];
+                identifiers.pop();
+                break;
+            }
+        }
+        
+        emit RemovedBeneficiaryUserIdentifier(_ascendAddress, _beneficiaryUserIdentifier);
+    }
+
+    function verifyUserData(address ascendAddress) internal view {        
+        // Get the allowed beneficiary user identifiers for this ascend
+        uint256[] memory allowedBeneficiaryUserIdentifier = beneficiaryData[ascendAddress].beneficiaryUserIdentifier;
+        
+        // Check if lastUserIdentifier exists in the allowed list
+        bool isAllowed = false;
+        for (uint256 i = 0; i < allowedBeneficiaryUserIdentifier.length; i++) {
+            if (allowedBeneficiaryUserIdentifier[i] == lastUserIdentifier) {
+                isAllowed = true;
+                break;
+            }
+        }
+        
+        if (!isAllowed) {
+            revert UserIdentifierMismatch(0, lastUserIdentifier); // 0 indicates "not found in allowed list"
+        } 
+    }
+
+    function testverifyUserData(address ascendAddress) internal {        
+        // Get the allowed beneficiary user identifiers for this ascend
+        uint256[] memory allowedBeneficiaryUserIdentifier = beneficiaryData[ascendAddress].beneficiaryUserIdentifier;
+        
+        // Check if lastUserIdentifier exists in the allowed list
+        bool isAllowed = false;
+        for (uint256 i = 0; i < allowedBeneficiaryUserIdentifier.length; i++) {
+            if (allowedBeneficiaryUserIdentifier[i] == lastUserIdentifier) {
+                isAllowed = true;
+                break;
+            }
+        }
+        
+        if (!isAllowed) {
+            emit StringLogEvent("Check_Failed");
+        } else {
+            emit StringLogEvent("Check_Successfull");
+        }
     }
 
 
@@ -96,26 +168,98 @@ contract UserVerification is SelfVerificationRoot {
         bytes memory userData
     ) internal override {
         verificationSuccessful = true;
-        lastOutput = output;
-        lastUserData = userData;
-        lastUserAddress = address(uint160(output.userIdentifier));
+        lastUserIdentifier = output.nullifier;
+        
+        //emit ByteLogEvent(userData);
+        emit Uint256LogEvent(lastUserIdentifier);
 
-        // Test Data -> Test successful
-        /*
-        string memory name = "ALBRECHT<<TOM";
-        string memory dateOfBirth = "000101";
-        */
-        //revert LogError(output.name);
-        // Verwende das erste Element des Name-Arrays als Input für formatName
-        //string[] memory names = formatName(name); 
-        lastUserFirstName = output.name[0];
-        lastUserLastName = output.name[1];
-        lastUserDOB = output.dateOfBirth;
+        // Parse userData to address
+        address ascendAddress = parseAddressFromUserData(userData);
+        emit AddressParsingEvent(ascendAddress, userData);
         
-        verifyUserData();
+        // Now you can use the parsed address
+        // For example, call verifyUserData with the parsed address
+        testverifyUserData(ascendAddress);
+    }
+
+    function testCustomVerification(
+        ISelfVerificationRoot.GenericDiscloseOutputV2 memory output,
+        bytes memory userData
+    ) external {
+        customVerificationHook(output, userData);
+    } 
+
+    /**
+     * @notice Parse address from userData bytes
+     * @dev Handles both ABI-encoded addresses and hex string addresses
+     * @param userData The user data containing the address
+     * @return The parsed address
+     */
+    function parseAddressFromUserData(bytes memory userData) internal pure returns (address) {
+        // First, try to decode as ABI-encoded address (20 bytes)
+        if (userData.length == 32) {
+            // Standard ABI encoding of address (padded to 32 bytes)
+            return abi.decode(userData, (address));
+        } else if (userData.length == 20) {
+            // Raw address bytes (20 bytes)
+            return address(bytes20(userData));
+        } else if (userData.length == 42) {
+            // Hex string format: "0x" + 40 hex chars = 42 chars
+            return parseHexStringToAddress(userData);
+        } else if (userData.length == 40) {
+            // Hex string without "0x" prefix = 40 chars
+            return parseHexStringToAddress(userData);
+        } else {
+            revert("Invalid userData format for address parsing");
+        }
+    }
+
+    /**
+     * @notice Parse hex string to address
+     * @dev Converts hex string bytes to address
+     * @param hexString The hex string as bytes
+     * @return The parsed address
+     */
+    function parseHexStringToAddress(bytes memory hexString) internal pure returns (address) {
+        require(hexString.length == 40 || hexString.length == 42, "Invalid hex string length");
         
-        emit UserData(lastUserFirstName, lastUserLastName, lastUserDOB);
-        emit VerificationCompleted(output, userData);
+        uint256 startIndex = 0;
+        if (hexString.length == 42) {
+            // Skip "0x" prefix
+            require(hexString[0] == 0x30 && hexString[1] == 0x78, "Invalid hex prefix");
+            startIndex = 2;
+        }
+        
+        bytes20 addressBytes;
+        for (uint256 i = 0; i < 20; i++) {
+            uint8 high = hexCharToByte(hexString[startIndex + i * 2]);
+            uint8 low = hexCharToByte(hexString[startIndex + i * 2 + 1]);
+            addressBytes |= bytes20(bytes1(high * 16 + low)) >> (i * 8);
+        }
+        
+        return address(addressBytes);
+    }
+
+    /**
+     * @notice Convert hex character to byte value
+     * @dev Converts ASCII hex character to its byte value
+     * @param hexChar The hex character as byte
+     * @return The byte value (0-15)
+     */
+    function hexCharToByte(bytes1 hexChar) internal pure returns (uint8) {
+        uint8 char = uint8(hexChar);
+        if (char >= 48 && char <= 57) {
+            // '0' - '9'
+            return char - 48;
+        } else if (char >= 65 && char <= 70) {
+            // 'A' - 'F'
+            return char - 55;
+        } else if (char >= 97 && char <= 102) {
+            // 'a' - 'f'
+            return char - 87;
+        } else {
+            revert("Invalid hex character");
+        }
     }
 
     /**
@@ -169,24 +313,10 @@ contract UserVerification is SelfVerificationRoot {
     }
 
     function getConfigId(
-        bytes32 destinationChainId,
-        bytes32 userIdentifier,
-        bytes memory userDefinedData
+        bytes32 /* destinationChainId */,
+        bytes32 /* userIdentifier */,
+        bytes memory /* userDefinedData */
     ) public view override returns (bytes32) {
         return verificationConfigId;
-    }
-
-    /**
-     * @notice Test function to simulate calling onVerificationSuccess from hub
-     * @dev This function is only for testing purposes to verify access control
-     * @param output The verification output
-     * @param userData The user data
-     */
-    function testOnVerificationSuccess(
-        bytes memory output,
-        bytes memory userData
-    ) external {
-        // This should fail if called by anyone other than the hub
-        onVerificationSuccess(output, userData);
     }
 }
