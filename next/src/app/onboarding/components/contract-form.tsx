@@ -82,6 +82,9 @@ export function ContractForm() {
             formData.beneficiaries.map((b) => b.wallet as `0x${string}`),
             formData.checkInInterval
         );
+        setTimeout(() => {
+            window.location.href = '/consolidate';
+        }, 2000); // Redirect after 2 seconds
     };
 
     return (
@@ -91,23 +94,7 @@ export function ContractForm() {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
             {/* <ScrollProgressBasic> */}
-            <div className="h-screen flex flex-col items-center justify-center snap-start">
-                <p className="text-3xl font-thin text-center max-w-48 mx-auto">
-                    Lets check where your <strong className="font-bold">assets</strong> are floating around.
-                </p>
-            </div>
-            <div className="h-screen flex flex-col items-center px-6 pt-12 snap-start">
-                <ListAssets />
-            </div>
-            <div className="h-screen flex flex-col items-center justify-center snap-start">
-                <p className="text-3xl font-thin text-center max-w-52 mx-auto">
-                    Let's make it easy and <span className="font-bold">secure them in one place</span>.
-                </p>
-            </div>
-            <div className="h-screen flex flex-col items-center justify-center snap-start">
-                <img src={'/img/ascend.png'} alt="Ascend Logo" className="w-64 mb-4" />
-                <Consolidate />
-            </div>
+
             <div className="h-screen flex flex-col items-center justify-center snap-start">
                 <p className="text-3xl font-thin text-center max-w-48 mx-auto">
                     Now its time to <strong className="font-bold">add your beloved ones.</strong>
