@@ -41,7 +41,6 @@ export function ValidateBeneficiaries({
     const [userId, setUserId] = useState(ethers.ZeroAddress);
 
     const currentBeneficiary = beneficiaries[currentBeneficiaryIndex];
-    const title = `Securing ${currentBeneficiary.name} ${currentBeneficiary.lastName}`;
 
     // Use useMemo to cache the array to avoid creating a new array on each render
     const excludedCountries = useMemo(() => [countries.NORTH_KOREA], []);
@@ -285,7 +284,6 @@ export function ValidateBeneficiaries({
 
             {/* Header */}
             <div className="mb-6 md:mb-8 text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-800">{title}</h1>
                 <p className="text-sm sm:text-base text-gray-600 px-2">
                     Scan QR code with Self Protocol App to secure the identity
                 </p>
@@ -321,7 +319,7 @@ export function ValidateBeneficiaries({
                         type="button"
                         onClick={openSelfApp}
                         disabled={!universalLink}
-                        className=" btn btn-primary btn-lg disabled:cursor-not-allowed"
+                        className="flex-1 btn btn-primary btn-lg disabled:cursor-not-allowed"
                     >
                         Open Self App
                     </button>
@@ -352,13 +350,6 @@ export function ValidateBeneficiaries({
                     >
                         Next →
                     </button>
-                </div>
-
-                <div className="flex flex-col items-center gap-2 mt-2">
-                    <span className="text-gray-500 text-xs uppercase tracking-wide">User Address</span>
-                    <div className="bg-gray-100 rounded-md px-3 py-2 w-full text-center break-all text-sm font-mono text-gray-800 border border-gray-200">
-                        {userId ? userId : <span className="text-gray-400">Not connected</span>}
-                    </div>
                 </div>
 
                 {/* Toast notification */}
