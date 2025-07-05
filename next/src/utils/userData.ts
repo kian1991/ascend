@@ -5,21 +5,10 @@ export enum CaseType {
   VERIFY = 2
 }
 
-/**
- * Create userData bytes containing case type and Ethereum address
- * @param caseType 1 for Connect, 2 for Verify
- * @param ethAddress Ethereum address as string
- * @returns Hex string of encoded userData
- */
-export function createUserData(caseType: CaseType, ethAddress: string): `0x${string}` {
-  // Convert case type to hex (1 byte)
-  const caseHex = caseType.toString(16).padStart(2, '0');
-  
-  // Remove 0x prefix from address and ensure it's lowercase
-  const addressHex = ethAddress.toLowerCase().replace('0x', '');
-  
+
+export function createUserData(caseType: CaseType): `0x${string}` {
   // Combine: 1 byte case + 20 bytes address
-  return `0x${caseHex}${addressHex}` as `0x${string}`;
+  return `0x0${caseType}` as `0x${string}`;
 }
 
 /**
