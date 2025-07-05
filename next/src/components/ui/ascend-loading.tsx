@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 
 export function AscendLoading() {
     return (
-        <div className="flex flex-col items-center justify-center h-full">
+        <div className="flex flex-col items-center justify-center min-h-screen">
             <motion.img
                 src={'/img/a.png'}
                 alt="Ascend Logo"

@@ -79,14 +79,16 @@ export function ContractForm() {
 
     const handleSubmit = () => {
         console.log(formData);
-        // createAscent(
-        //     formData.grantor as `0x${string}`, // Ensure grantor is a valid ETH address
-        //     formData.beneficiaries.map((b) => b.wallet as `0x${string}`),
-        //     formData.checkInInterval
-        // );
-        setTimeout(() => {
-            push('/consolidate'); //
-        }, 2000); // Redirect after 2 seconds
+        createAscent(
+            formData.grantor as `0x${string}`, // Ensure grantor is a valid ETH address
+            formData.beneficiaries.map((b) => b.wallet as `0x${string}`),
+            formData.checkInInterval
+        ).then((data) => {
+            console.log('Ascent created successfully:', data);
+        });
+        // setTimeout(() => {
+        //     push('/consolidate'); //
+        // }, 2000); // Redirect after 2 seconds
     };
 
     return (
@@ -234,7 +236,7 @@ export function ContractForm() {
             </div>
 
             {/* CONTROLS */}
-            {currentStep < MAX_STEPS && (
+            {/* {currentStep < MAX_STEPS && (
                 <div className="fixed w-full left-0 bottom-20 flex items-center justify-between z-20 px-12 py-4">
                     {currentStep > 1 ? (
                         <button className="btn btn-xl btn-circle " onClick={handleBack}>
@@ -248,7 +250,7 @@ export function ContractForm() {
                         <ArrowRight />
                     </button>
                 </div>
-            )}
+            )} */}
         </div>
     );
 }
