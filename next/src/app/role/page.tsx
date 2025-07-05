@@ -6,15 +6,15 @@ import { useRouter } from 'next/navigation';
 
 export default function Role() {
     const { user } = usePrivy();
-    const { useBeneficiariesByGrantor } = useAscentRegistryRead();
+    const { useAscentsByGrantor } = useAscentRegistryRead();
     const { push } = useRouter();
 
-    const { data, isLoading } = useBeneficiariesByGrantor(user?.wallet?.address![0] as `0x${string}`);
+    const { data: ascends, isLoading } = useAscentsByGrantor(user?.wallet?.address! as `0x${string}`);
 
     function handleGrantorClick() {
         // Logic for Grantor role selection
-        console.log('Grantor selected', data);
-        push('/onboarding');
+        if (!ascends) push('/onboarding');
+        else push('/contracts');
     }
 
     function handleBeneficiaryClick() {
@@ -23,13 +23,13 @@ export default function Role() {
     }
 
     return (
-        <div className="">
+        <div>
             <div className="flex flex-col gap-3">
-                <h3 className="tracking-tight font-bold text-2xl text-center mb-2">WHO ARE YOU?</h3>
-                <button className="btn btn-xl btn-dash uppercase" onClick={handleGrantorClick}>
+                <h3 className="tracking-tight font-thin text-3xl text-center mb-2">WHO ARE YOU?</h3>
+                <button className="btn btn-xl btn-outline uppercase" onClick={handleGrantorClick}>
                     GRANTOR
                 </button>
-                <button className="btn btn-xl btn-dash uppercase" onClick={handleBeneficiaryClick}>
+                <button className="btn btn-xl btn-outline uppercase" onClick={handleBeneficiaryClick}>
                     BENEFICIARY
                 </button>
             </div>

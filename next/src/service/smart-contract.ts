@@ -18,11 +18,11 @@ export const ASCENT_ABI = AscentArtifact.abi;
 
 // Check-in interval enum
 export enum CheckInInterval {
-    SEVEN_DAYS = 0,
-    FOURTEEN_DAYS = 1,
-    THIRTY_DAYS = 2,
-    ONE_EIGHTY_DAYS = 3,
-    THREE_SIXTY_FIVE_DAYS = 4
+    SEVEN_DAYS = 0, // 7 days
+    FOURTEEN_DAYS = 1, // 14 days
+    THIRTY_DAYS = 2, // 30 days
+    ONE_EIGHTY_DAYS = 3, // 180 days
+    THREE_SIXTY_FIVE_DAYS = 4 // 365 days
 }
 
 // AscentRegistry Contract Functions
@@ -121,7 +121,8 @@ export const useAscent = (ascentAddress: Address) => {
         return writeContract({
             address: ascentAddress,
             abi: ASCENT_ABI,
-            functionName: 'checkIn'
+            functionName: 'checkIn',
+            args: []
         });
     };
 
