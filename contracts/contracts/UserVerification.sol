@@ -36,6 +36,11 @@ contract UserVerification is SelfVerificationRoot {
     // Added Events
     event AddedBeneficiary(
         address ascendAddress,
+        uint256 beneficiaryUserIdentifier
+    );
+
+    event AddedBeneficiaries(
+        address ascendAddress,
         uint256[] beneficiaryUserIdentifiers
     );
 
@@ -70,12 +75,16 @@ contract UserVerification is SelfVerificationRoot {
     }
 
     //Helper Functions
+    function addOneBeneficiary(address _ascendAddress, uint256 _beneficiaryUserIdentifier) internal {
+        beneficiaryData[_ascendAddress].beneficiaryUserIdentifier.push(_beneficiaryUserIdentifier);
+        emit AddedBeneficiary(_ascendAddress, _beneficiaryUserIdentifier);
+    }
 
     function addBeneficiaryData(address _ascendAddress, uint256[] memory _beneficiaryUserIdentifiers) external {
         for (uint256 j = 0; j < _beneficiaryUserIdentifiers.length; j++) {
                 beneficiaryData[_ascendAddress].beneficiaryUserIdentifier.push(_beneficiaryUserIdentifiers[j]);
             }
-        emit AddedBeneficiary(_ascendAddress, _beneficiaryUserIdentifiers);
+        emit AddedBeneficiaries(_ascendAddress, _beneficiaryUserIdentifiers);
     }
 
     function addBeneficiaryDataBatch(
@@ -91,7 +100,7 @@ contract UserVerification is SelfVerificationRoot {
             for (uint256 j = 0; j < identifiers.length; j++) {
                 beneficiaryData[addr].beneficiaryUserIdentifier.push(identifiers[j]);
             }
-            emit AddedBeneficiary(addr, identifiers);
+            emit AddedBeneficiaries(addr, identifiers);
         }
     }
 
@@ -102,7 +111,7 @@ contract UserVerification is SelfVerificationRoot {
     /* Function which needs to be called from the smart contract that handles the releasing of the funds, 
     once the funds have been released to the corresponding user. To make sure that no other beneficiary can claim using the same ZK Proof.
     */
-    function removeBeneficiaryUserIdentifier(address _ascendAddress, uint256 _beneficiaryUserIdentifier) external {
+    function removeBeneficiaryUserIdentifier(address _ascendAddress, uint256 _beneficiaryUserIdentifier) internal {
         uint256[] storage identifiers = beneficiaryData[_ascendAddress].beneficiaryUserIdentifier;
         
         // Find and remove the identifier
@@ -156,6 +165,10 @@ contract UserVerification is SelfVerificationRoot {
         }
     }
 
+    struct CaseData {
+        uint8 caseType;  // 1 = Connect, 2 = Verify
+    }
+
 
     /**
      * @notice Implementation of customVerificationHook for testing
@@ -169,18 +182,37 @@ contract UserVerification is SelfVerificationRoot {
     ) internal override {
         verificationSuccessful = true;
         lastUserIdentifier = output.nullifier;
-        
-        //emit ByteLogEvent(userData);
-        emit Uint256LogEvent(lastUserIdentifier);
+        address ascendAddress = address(uint160(output.userIdentifier));
 
-        // Parse userData to address
-        address ascendAddress = parseAddressFromUserData(userData);
-        emit AddressParsingEvent(ascendAddress, userData);
+        // Parse userData to get case type and address
+        CaseData memory caseData;
+
+        // Parse userData as integer (1 or 2)
+        if (keccak256(userData) == keccak256(abi.encodePacked("Connect"))) {
+            caseData.caseType = 1;
+        } else if (keccak256(userData) == keccak256(abi.encodePacked("Verify"))) {
+            caseData.caseType = 2;
+        } else {
+           revert("Invalid userData format for case type");
+        }
+
+        require(caseData.caseType == 1 || caseData.caseType == 2, "Invalid case type");
+
+        emit Uint256LogEvent(caseData.caseType);
         
-        // Now you can use the parsed address
-        // For example, call verifyUserData with the parsed address
-        testverifyUserData(ascendAddress);
+        if (caseData.caseType == 1) {
+            // Handle Connect case
+            emit StringLogEvent("Case: Connect");
+            addOneBeneficiary(ascendAddress, lastUserIdentifier);
+            // Your connect logic here
+        } else if (caseData.caseType == 2) {
+            // Handle Verify case
+            emit StringLogEvent("Case: Verify");
+            verifyUserData(ascendAddress);
+            removeBeneficiaryUserIdentifier(ascendAddress, lastUserIdentifier);
+        }
     }
+    
 
     function testCustomVerification(
         ISelfVerificationRoot.GenericDiscloseOutputV2 memory output,
@@ -190,6 +222,7 @@ contract UserVerification is SelfVerificationRoot {
     } 
 
     /**
+     * Was previously needed where we planned to give the ascendId by the userData
      * @notice Parse address from userData bytes
      * @dev Handles both ABI-encoded addresses and hex string addresses
      * @param userData The user data containing the address
@@ -241,6 +274,7 @@ contract UserVerification is SelfVerificationRoot {
     }
 
     /**
+     * Was previously needed where we planned to give the ascendId by the userData
      * @notice Convert hex character to byte value
      * @dev Converts ASCII hex character to its byte value
      * @param hexChar The hex character as byte

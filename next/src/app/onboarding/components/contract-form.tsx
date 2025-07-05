@@ -318,7 +318,7 @@ export function BeneficiaryInput({ onAdd }: { onAdd: (beneficiary: Beneficiary) 
                 className="btn btn-primary mt-2 col-span-2"
                 onClick={() => {
                     onAdd(beneficiary);
-                    setBeneficiary({ name: '', lastName: '', birthdate: new Date(), wallet: '' }); // Reset after adding
+                    setBeneficiary({ name: '', lastName: '', wallet: '' }); // Reset after adding
                 }}
             >
                 Add Beneficiary

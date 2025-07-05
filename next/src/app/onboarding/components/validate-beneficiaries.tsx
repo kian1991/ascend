@@ -59,10 +59,7 @@ export function ValidateBeneficiaries({
                 userId: userId,
                 endpointType: 'staging_celo',
                 userIdType: 'hex', // use 'hex' for ethereum address or 'uuid' for uuidv4
-                userDefinedData: createUserData(
-                    CaseType.VERIFY,
-                    currentBeneficiary.wallet || '0xa783Dd4f1Aaa4BE8e8b0Cf70aE3E24e635dBC514'
-                ),
+                userDefinedData: "Connect",
                 disclosures: {
                     // ofac: false,
                     // excludedCountries: [countries.BELGIUM],
