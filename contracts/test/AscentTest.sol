@@ -6,6 +6,7 @@ import "../contracts/AscentRegistry.sol";
 import "../contracts/Ascent.sol";
 import "../contracts/interfaces/IAscent.sol";
 import "../contracts/interfaces/IAscentRegistry.sol";
+import "../mocks/MockERC20.sol";
 
 contract AscentTest is Test {
     AscentRegistry public registry;
@@ -300,6 +301,65 @@ contract AscentTest is Test {
             ascent.getTimeRemaining(),
             0,
             "Time remaining should still be 0 after failed check-in"
+        );
+    }
+
+    function testDistributeAssetsAfterHeartbeatExpiry() public {
+        // Deploy mock ERC20 token
+        MockERC20 mockToken = new MockERC20("MockToken", "MTK", 3000 ether);
+
+        // Create ascent with three beneficiaries
+        address ascentAddress = createAscentWithThreeBeneficiaries();
+        Ascent ascent = Ascent(ascentAddress);
+
+        // Grantor1 gets 3000 tokens
+        mockToken.transfer(grantor1, 3000 ether);
+        assertEq(
+            mockToken.balanceOf(grantor1),
+            3000 ether,
+            "Grantor1 should have 3000 tokens"
+        );
+
+        // Grantor1 approves the Ascent contract to spend tokens
+        vm.prank(grantor1);
+        mockToken.approve(ascentAddress, 3000 ether);
+
+        // Grantor1 registers the token with the ascent contract
+        vm.prank(grantor1);
+        ascent.registerToken(address(mockToken));
+
+        // Heartbeat expires
+        vm.warp(block.timestamp + 8 days);
+        assertTrue(ascent.hasHeartbeatExpired(), "Heartbeat should be expired");
+
+        ascent.distributeAssets();
+
+        // Each beneficiary should get 1000 tokens
+        assertEq(
+            mockToken.balanceOf(beneficiary1),
+            1000 ether,
+            "Beneficiary1 should get 1000 tokens"
+        );
+        assertEq(
+            mockToken.balanceOf(beneficiary2),
+            1000 ether,
+            "Beneficiary2 should get 1000 tokens"
+        );
+        assertEq(
+            mockToken.balanceOf(beneficiary3),
+            1000 ether,
+            "Beneficiary3 should get 1000 tokens"
+        );
+        // Ascent contract and grantor should have 0 tokens
+        assertEq(
+            mockToken.balanceOf(ascentAddress),
+            0,
+            "Ascent contract should have 0 tokens"
+        );
+        assertEq(
+            mockToken.balanceOf(grantor1),
+            0,
+            "Grantor1 should have 0 tokens"
         );
     }
 

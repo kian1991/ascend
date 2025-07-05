@@ -3,6 +3,7 @@ pragma solidity 0.8.28;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IAscent.sol";
 import "./interfaces/IAscentRegistry.sol";
@@ -17,6 +18,7 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
     IAscent.CheckInInterval public checkInInterval;
     uint256 public lastCheckIn;
     address public registry; // AscentRegistry address
+    using SafeERC20 for IERC20;
 
     // Custom errors
     error HeartbeatExpiredCannotCheckIn();
@@ -29,7 +31,7 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
 
     // Distribution state
     bool public assetsDistributed;
-    
+
     // ERC20 tokens registered for distribution
     address[] public registeredTokens;
 
@@ -86,7 +88,7 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
         }
 
         beneficiaries.push(_beneficiary);
-        
+
         // Notify registry about the new beneficiary
         IAscentRegistry(registry).notifyBeneficiaryAdded(owner(), _beneficiary);
     }
@@ -116,9 +118,12 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
         // Remove by swapping with last element and popping
         beneficiaries[indexToRemove] = beneficiaries[beneficiaries.length - 1];
         beneficiaries.pop();
-        
+
         // Notify registry about the removed beneficiary
-        IAscentRegistry(registry).notifyBeneficiaryRemoved(owner(), _beneficiary);
+        IAscentRegistry(registry).notifyBeneficiaryRemoved(
+            owner(),
+            _beneficiary
+        );
     }
 
     /**
@@ -128,14 +133,14 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
      */
     function registerToken(address tokenAddress) external onlyOwner {
         require(tokenAddress != address(0), InvalidBeneficiaryAddress());
-        
+
         // Check if token is already registered
         for (uint256 i = 0; i < registeredTokens.length; i++) {
             if (registeredTokens[i] == tokenAddress) {
                 revert BeneficiaryAlreadyExists(); // Reusing error for token already exists
             }
         }
-        
+
         registeredTokens.push(tokenAddress);
     }
 
@@ -214,11 +219,15 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
         assetsDistributed = true;
 
         // Distribute all registered ERC20 tokens
-        for (uint256 tokenIndex = 0; tokenIndex < registeredTokens.length; tokenIndex++) {
+        for (
+            uint256 tokenIndex = 0;
+            tokenIndex < registeredTokens.length;
+            tokenIndex++
+        ) {
             address tokenAddress = registeredTokens[tokenIndex];
             IERC20 token = IERC20(tokenAddress);
-            
-            // 
+
+            //
             uint256 tokenAllowance = token.allowance(owner(), address(this));
             if (tokenAllowance > 0) {
                 _distributeToken(token, tokenAllowance);
@@ -241,14 +250,14 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
         // Distribute tokens equally among all beneficiaries
         for (uint256 i = 0; i < beneficiaries.length; i++) {
             uint256 amount = amountPerBeneficiary;
-            
+
             // Give remainder to the first beneficiary to ensure all tokens are distributed
             if (i == 0) {
                 amount += remainder;
             }
-            
+
             if (amount > 0) {
-                require(token.transfer(beneficiaries[i], amount), "Token transfer failed");
+                token.safeTransferFrom(owner(), beneficiaries[i], amount);
             }
         }
     }
