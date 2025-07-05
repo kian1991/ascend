@@ -3,13 +3,14 @@ import { AnimatedGroup } from '@/components/ui/animated-group';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Beneficiary, ETHAddress } from '@/zod/schemas';
 import { usePrivy } from '@privy-io/react-auth';
-import { ArrowLeft, ArrowRight, Heart, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Heart, Trash2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { CheckInInterval, useAscent, useAscentRegistry } from '@/service/smart-contract';
 import { ListAssets } from '@/app/claim/_components/list-assets';
 import { Consolidate } from './consolidate';
+import { ValidateBeneficiaries } from './validate-beneficiaries';
 
-const MAX_STEPS = 5;
+const MAX_STEPS = 9;
 
 export function ContractForm() {
     const [currentStep, setCurrentStep] = useState(1);
@@ -26,13 +27,11 @@ export function ContractForm() {
             {
                 name: 'Kian',
                 lastName: 'Lütke',
-                birthdate: new Date('1991-02-21'),
                 wallet: '0x4a1db00CEF07772e38D0235A0341164Ec1D63C09'
             },
             {
                 name: 'Tim',
                 lastName: 'Sigl',
-                birthdate: new Date('1997-08-08'),
                 wallet: '0x06Ed05340de68Dd5BaF10Fc77e296b106De7b2ee'
             }
         ],
@@ -102,7 +101,7 @@ export function ContractForm() {
             </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
                 <p className="text-3xl font-thin text-center max-w-52 mx-auto">
-                    Let's make it easy and secure them in one place.
+                    Let's make it easy and <span className="font-bold">secure them in one place</span>.
                 </p>
             </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
@@ -111,7 +110,7 @@ export function ContractForm() {
             </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
                 <p className="text-3xl font-thin text-center max-w-48 mx-auto">
-                    Now its Time to add your beloved ones.
+                    Now its time to <strong className="font-bold">add your beloved ones.</strong>
                 </p>
             </div>
             <div className="h-screen snap-start w-full flex flex-col px-8 py-12">
@@ -179,6 +178,18 @@ export function ContractForm() {
                 </select>
 
                 <h3 className="text-3xl font-thin">Days</h3>
+            </div>
+            <div className="h-screen flex flex-col items-center justify-center snap-start">
+                <p className="text-3xl font-thin text-center max-w-52 mx-auto">
+                    Almost there! Lets make sure{' '}
+                    <strong className="font-bold">only your loved ones have access.</strong>
+                </p>
+            </div>
+            <div className="h-screen flex flex-col items-center justify-center snap-start">
+                <ValidateBeneficiaries
+                    beneficiaries={formData.beneficiaries}
+                    grantorWallet={formData.grantor as ETHAddress}
+                />
             </div>
             <div className="h-screen flex flex-col justify-center snap-start w-full px-6">
                 <h3 className="text-base-content text-3xl font-thin text-center">
@@ -255,7 +266,7 @@ export function ContractForm() {
 
 function BeneficiaryCard({ beneficiary, onDelete }: { beneficiary: Beneficiary; onDelete?: () => void }) {
     return (
-        <div className="bg-secondary/50 p-6 rounded-lg shadow-sm w-full relative flex flex-col gap-1">
+        <div className="bg-base-100 px-4 py-3 rounded-lg w-full relative flex flex-col gap-1">
             {onDelete && (
                 <button
                     onClick={() => onDelete()}
@@ -265,13 +276,19 @@ function BeneficiaryCard({ beneficiary, onDelete }: { beneficiary: Beneficiary; 
                 </button>
             )}
             <div>
-                <h3 className="text-lg font-semibold">
-                    {beneficiary.name} {beneficiary.lastName}
+                <h3 className="text-lg font-semibold flex items-center justify-between">
+                    <span>
+                        {beneficiary.name} {beneficiary.lastName}
+                    </span>
+                    {!onDelete && (
+                        <span className="badge badge-accent px-2 text-sm">
+                            ZK Verified <Check className="inline" size={16} />
+                        </span>
+                    )}
                 </h3>
-                <p className="text-sm">Birthdate: {beneficiary.birthdate.toLocaleDateString()}</p>
             </div>
 
-            <div className="badge badge-soft px-2 text-[.65em] font-mono">{beneficiary.wallet}</div>
+            <div className="badge badge-soft px-2 text-[.8em] font-mono">{beneficiary.wallet}</div>
         </div>
     );
 }
@@ -280,42 +297,36 @@ export function BeneficiaryInput({ onAdd }: { onAdd: (beneficiary: Beneficiary) 
     const [beneficiary, setBeneficiary] = useState<Beneficiary>({
         name: '',
         lastName: '',
-        birthdate: new Date('2005-11-22'), // Default date, can be changed
         wallet: ''
     });
     // This component should handle the input for a single beneficiary
     // It will receive the beneficiary object and a function to update it
 
     return (
-        <div className="grid grid-cols-3 gap-2 w-full mt-6 p-6 bg-accent rounded-2xl">
+        <div className="grid grid-cols-2 gap-2 w-full mt-6 p-6 bg-accent rounded-2xl bg-base-100">
             <input
                 type="text"
                 value={beneficiary.name}
                 onChange={(e) => setBeneficiary({ ...beneficiary, name: e.target.value })}
                 placeholder="Name"
-                className="input input-bordered w-full"
+                className="input input-secondary input-bordered w-full"
             />
             <input
                 type="text"
                 value={beneficiary.lastName}
                 onChange={(e) => setBeneficiary({ ...beneficiary, lastName: e.target.value })}
                 placeholder="Last Name"
-                className="input input-bordered w-full"
-            />
-            <DatePicker
-                date={beneficiary.birthdate}
-                onDateChange={(date) => setBeneficiary({ ...beneficiary, birthdate: date })}
-                className="input input-bordered w-full"
+                className="input input-secondary input-bordered w-full"
             />
             <input
                 type="text"
                 value={beneficiary.wallet}
                 onChange={(e) => setBeneficiary({ ...beneficiary, wallet: e.target.value })}
                 placeholder="0x12345abcdef...."
-                className="input input-bordered w-full col-span-3" // Full width for wallet input
+                className="input input-secondary input-bordered w-full col-span-2" // Full width for wallet input
             />
             <button
-                className="btn btn-primary mt-2 col-span-3"
+                className="btn btn-primary mt-2 col-span-2"
                 onClick={() => {
                     onAdd(beneficiary);
                     setBeneficiary({ name: '', lastName: '', birthdate: new Date(), wallet: '' }); // Reset after adding
