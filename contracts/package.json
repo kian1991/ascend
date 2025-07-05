@@ -11,8 +11,12 @@
     "typescript": "~5.8.0",
     "viem": "^2.31.7"
   },
+  "scripts": {
+    "set:scope": "npx hardhat run scripts/setScopeUserVerification.ts --network alfajores"
+  },
   "dependencies": {
     "@openzeppelin/contracts": "^5.3.0",
-    "@openzeppelin/contracts-upgradeable": "^5.3.0"
+    "@openzeppelin/contracts-upgradeable": "^5.3.0",
+    "@selfxyz/contracts": "^1.2.0"
   }
 }

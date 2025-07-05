@@ -2,6 +2,9 @@
   "AscentModule": {
     "description": "Basic deployment parameters for Ascent system"
   },
+  "UseVerificationModule": {
+    "description": "Basic deployment parameters for UseVerificationModule system"
+  },
   "AscentModuleAdvanced": {
     "description": "Advanced deployment parameters for Ascent system with network-specific configurations"
   }

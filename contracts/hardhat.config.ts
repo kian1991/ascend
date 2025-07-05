@@ -26,7 +26,7 @@ const config: HardhatUserConfig = {
        * in the CLI or by the tasks you are running.
        */
       default: {
-        version: "0.8.30",
+        version: "0.8.28",
       },
       /*
        * The production profile is meant to be used for deployments, providing
@@ -34,7 +34,7 @@ const config: HardhatUserConfig = {
        * steps to simplify the process of verifying your contracts.
        */
       production: {
-        version: "0.8.30",
+        version: "0.8.28",
         settings: {
           optimizer: {
             enabled: true,

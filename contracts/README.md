@@ -17,7 +17,7 @@ npx hardhat test nodejs
 ### Set private key for deployment on Celo testnet (alfajores) 
 
 ```shell
-npx hardhat keystore set ALFAJORES_PRIVATE_KEY <your-private-key>
+npx hardhat keystore set ALFAJORES_PRIVATE_KEY 
 ```
 
 ### Make a deployment to Celo testnet (alfajores) 
@@ -25,4 +25,3 @@ npx hardhat keystore set ALFAJORES_PRIVATE_KEY <your-private-key>
 ```shell
 npx hardhat ignition deploy --network alfajores ignition/modules/AscentModule.ts
 ```
-
