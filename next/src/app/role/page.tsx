@@ -19,11 +19,11 @@ export default function Role() {
 
     function handleBeneficiaryClick() {
         // Logic for Beneficiary role selection
-        console.log('Beneficiary selected', data);
+        push('/claim');
     }
 
     return (
-        <div>
+        <div className="grid place-items-center min-h-screen">
             <div className="flex flex-col gap-3">
                 <h3 className="tracking-tight font-thin text-3xl text-center mb-2">WHO ARE YOU?</h3>
                 <button className="btn btn-xl btn-outline uppercase" onClick={handleGrantorClick}>

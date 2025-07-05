@@ -6,6 +6,8 @@ import { usePrivy } from '@privy-io/react-auth';
 import { ArrowLeft, ArrowRight, Heart, Trash2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { CheckInInterval, useAscent, useAscentRegistry } from '@/service/smart-contract';
+import { ListAssets } from '@/app/claim/_components/list-assets';
+import { Consolidate } from './consolidate';
 
 const MAX_STEPS = 5;
 
@@ -86,10 +88,27 @@ export function ContractForm() {
     return (
         <div
             ref={containerRef}
-            className="h-screen overflow-y-auto snap-y snap-mandatory scroll-smooth"
+            className="h-screen w-full overflow-y-auto snap-y snap-mandatory scroll-smooth"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
             {/* <ScrollProgressBasic> */}
+            <div className="h-screen flex flex-col items-center justify-center snap-start">
+                <p className="text-3xl font-thin text-center max-w-48 mx-auto">
+                    Lets check where your <strong className="font-bold">assets</strong> are floating around.
+                </p>
+            </div>
+            <div className="h-screen flex flex-col items-center px-6 pt-12 snap-start">
+                <ListAssets />
+            </div>
+            <div className="h-screen flex flex-col items-center justify-center snap-start">
+                <p className="text-3xl font-thin text-center max-w-52 mx-auto">
+                    Let's make it easy and secure them in one place.
+                </p>
+            </div>
+            <div className="h-screen flex flex-col items-center justify-center snap-start">
+                <img src={'/img/ascend.png'} alt="Ascend Logo" className="w-64 mb-4" />
+                <Consolidate />
+            </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
                 <p className="text-3xl font-thin text-center max-w-48 mx-auto">
                     Now its Time to add your beloved ones.
@@ -141,7 +160,7 @@ export function ContractForm() {
             <div className="h-screen flex flex-col items-center justify-center snap-start">
                 <h3 className="text-3xl font-thin">I want to chek-in every:</h3>
                 <select
-                    className="select select-lg select-bordered w-24  font-mono my-12"
+                    className="select select-lg select-bordered w-24 font-mono my-12"
                     value={formData.checkInInterval}
                     onChange={(e) =>
                         setFormData((prev) => ({
@@ -159,15 +178,19 @@ export function ContractForm() {
                     <option value={CheckInInterval.THREE_SIXTY_FIVE_DAYS}>365</option>
                 </select>
 
-                <h3 className="text-3xl  font-thin">Days</h3>
+                <h3 className="text-3xl font-thin">Days</h3>
             </div>
-            <div className="h-screen flex flex-col justify-center snap-start px-8 py-12">
+            <div className="h-screen flex flex-col justify-center snap-start w-full px-6">
                 <h3 className="text-base-content text-3xl font-thin text-center">
                     Please, check your inputs carefully
                 </h3>
                 <div className="mt-8 w-full flex flex-col gap-1">
-                    <h4 className="text-lg font-semibold">Your Address:</h4>
-                    <span className="badge badge-soft px-2 font-mono">{formData.grantor || 'Not set'}</span>
+                    <div className="text-center flex flex-col items-center">
+                        <h4 className="text-lg font-semibold ">Your Address:</h4>
+                        <span className="badge badge-soft px-2 font-mono text-[0.7em] ">
+                            {formData.grantor || 'Not set'}
+                        </span>
+                    </div>
 
                     <h4 className="text-lg font-semibold mt-6">Beneficiaries:</h4>
                     <div className="">
@@ -248,7 +271,7 @@ function BeneficiaryCard({ beneficiary, onDelete }: { beneficiary: Beneficiary; 
                 <p className="text-sm">Birthdate: {beneficiary.birthdate.toLocaleDateString()}</p>
             </div>
 
-            <div className="badge badge-dash px-2 font-mono">{beneficiary.wallet}</div>
+            <div className="badge badge-soft px-2 text-[.65em] font-mono">{beneficiary.wallet}</div>
         </div>
     );
 }

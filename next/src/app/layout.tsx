@@ -26,19 +26,17 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" data-theme="pastel">
-            <head>
-                <link rel="icon" href="/img/a.png" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-            </head>
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
-                <Template>
-                    <Providers>
-                        <LogoutFAB />
-                        <main className="min-h-screen bg-base-200 grid place-items-center">{children}</main>
-                    </Providers>
-                </Template>
-            </body>
-        </html>
+        <>
+            <html lang="en" data-theme="pastel">
+                <body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
+                    <Template>
+                        <Providers>
+                            <LogoutFAB />
+                            <main>{children}</main>
+                        </Providers>
+                    </Template>
+                </body>
+            </html>
+        </>
     );
 }

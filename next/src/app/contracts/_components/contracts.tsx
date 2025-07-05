@@ -72,7 +72,7 @@ export function Contracts() {
     }
 
     return (
-        <div className="flex flex-col gap-3 px-6 w-full">
+        <div className="flex flex-col gap-3 px-6 w-full min-h-screen justify-center">
             <motion.img src={'/img/a.png'} alt="Ascend Logo" className="w-64 mx-auto mb-4" />
             <h3 className="tracking-tight font-bold text-2xl text-center mb-2">Your Ascend</h3>
             <div className="mt-6">

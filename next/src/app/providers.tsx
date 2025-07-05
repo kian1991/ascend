@@ -1,5 +1,6 @@
 'use client';
 import { config } from '@/wagmi/config';
+import { NexusProvider } from '@avail-project/nexus';
 import { PrivyProvider } from '@privy-io/react-auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
@@ -22,7 +23,9 @@ export function Providers(props: { children: ReactNode }) {
             }}
         >
             <WagmiProvider config={config}>
-                <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+                <NexusProvider config={{ network: 'testnet' }}>
+                    <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+                </NexusProvider>
             </WagmiProvider>
         </PrivyProvider>
     );
