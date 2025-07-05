@@ -3,6 +3,7 @@ pragma solidity ^0.8.30;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IAscent.sol";
 import "./interfaces/IAscentRegistry.sol";
 import "./helpers/AscentHelper.sol";
@@ -22,6 +23,15 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
     error BeneficiaryAlreadyExists();
     error BeneficiaryNotFound();
     error InvalidBeneficiaryAddress();
+    error HeartbeatNotExpired();
+    error AssetsAlreadyDistributed();
+    error NoAssetsToDistribute();
+
+    // Distribution state
+    bool public assetsDistributed;
+    
+    // ERC20 tokens registered for distribution
+    address[] public registeredTokens;
 
     /**
      * @dev Constructor for the implementation contract (disables initializers)
@@ -46,6 +56,7 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
         checkInInterval = _checkInInterval;
         lastCheckIn = block.timestamp;
         registry = msg.sender; // The registry is the caller
+        assetsDistributed = false;
     }
 
     /**
@@ -111,6 +122,32 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
     }
 
     /**
+     * @dev Registers an ERC20 token for distribution
+     * Only the owner can call this function
+     * @param tokenAddress Address of the ERC20 token contract
+     */
+    function registerToken(address tokenAddress) external onlyOwner {
+        require(tokenAddress != address(0), InvalidBeneficiaryAddress());
+        
+        // Check if token is already registered
+        for (uint256 i = 0; i < registeredTokens.length; i++) {
+            if (registeredTokens[i] == tokenAddress) {
+                revert BeneficiaryAlreadyExists(); // Reusing error for token already exists
+            }
+        }
+        
+        registeredTokens.push(tokenAddress);
+    }
+
+    /**
+     * @dev Returns all registered token addresses
+     * @return Array of registered ERC20 token addresses
+     */
+    function getRegisteredTokens() external view returns (address[] memory) {
+        return registeredTokens;
+    }
+
+    /**
      * @dev Returns the number of beneficiaries
      */
     function getBeneficiaryCount() external view override returns (uint256) {
@@ -160,5 +197,59 @@ contract Ascent is Initializable, OwnableUpgradeable, IAscent {
             block.timestamp >=
             lastCheckIn +
                 AscentHelper.getCheckInIntervalSeconds(checkInInterval);
+    }
+
+    /**
+     * @dev Distributes the grantor's ERC20 tokens equally among beneficiaries when heartbeat has expired
+     * Can be called by anyone once the heartbeat has expired
+     * Assets can only be distributed once to prevent double spending
+     */
+    function distributeAssets() external {
+        require(hasHeartbeatExpired(), HeartbeatNotExpired());
+        require(!assetsDistributed, AssetsAlreadyDistributed());
+        require(beneficiaries.length > 0, NoAssetsToDistribute());
+        require(registeredTokens.length > 0, NoAssetsToDistribute());
+
+        // Mark assets as distributed to prevent re-entry
+        assetsDistributed = true;
+
+        // Distribute all registered ERC20 tokens
+        for (uint256 tokenIndex = 0; tokenIndex < registeredTokens.length; tokenIndex++) {
+            address tokenAddress = registeredTokens[tokenIndex];
+            IERC20 token = IERC20(tokenAddress);
+            
+            // 
+            uint256 tokenAllowance = token.allowance(owner(), address(this));
+            if (tokenAllowance > 0) {
+                _distributeToken(token, tokenAllowance);
+            }
+        }
+
+        emit AssetsDistributed(beneficiaries, registeredTokens.length);
+    }
+
+    /**
+     * @dev Internal function to distribute a specific ERC20 token among beneficiaries
+     * @param token The ERC20 token contract interface
+     * @param totalAmount Total amount of tokens to distribute
+     */
+    function _distributeToken(IERC20 token, uint256 totalAmount) internal {
+        // Calculate equal distribution amount per beneficiary
+        uint256 amountPerBeneficiary = totalAmount / beneficiaries.length;
+        uint256 remainder = totalAmount % beneficiaries.length;
+
+        // Distribute tokens equally among all beneficiaries
+        for (uint256 i = 0; i < beneficiaries.length; i++) {
+            uint256 amount = amountPerBeneficiary;
+            
+            // Give remainder to the first beneficiary to ensure all tokens are distributed
+            if (i == 0) {
+                amount += remainder;
+            }
+            
+            if (amount > 0) {
+                require(token.transfer(beneficiaries[i], amount), "Token transfer failed");
+            }
+        }
     }
 }

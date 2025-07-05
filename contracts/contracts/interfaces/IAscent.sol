@@ -18,6 +18,7 @@ interface IAscent {
     // Events
     event CheckIn(address indexed grantor, uint256 timestamp);
     event DeadMansSwitchTriggered(uint256 timestamp);
+    event AssetsDistributed(address[] beneficiaries, uint256 tokenCount);
 
     // Core functions
     function checkIn() external;
