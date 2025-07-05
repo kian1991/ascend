@@ -4,7 +4,7 @@ import { getAddress } from "viem";
 import type { Address } from "viem";
 
 async function main(): Promise<void> {
-    console.log("Setting scope for UserVerification contract...");
+    console.log("Adding Mock-Data for UserVerification contract...");
 
     // Find contract address from deployment files
     const ignitionPath = "./ignition/deployments/chain-44787/deployed_addresses.json";
@@ -42,13 +42,16 @@ async function main(): Promise<void> {
         const contract = await viem.getContractAt("UserVerification", contractAddress);
         console.log("Contract instance read successfully");
 
-        console.log("\nReady to set scope - contract interface is available!");
-        const newScope = "14842765288887605560928378114150503536133902418256853525826726862142166364831";
-        console.log("Setting scope to:", newScope);
+        console.log("\nReady to set Mock-Data - contract interface is available!");
+        const ascendAddress = "0xa783Dd4f1Aaa4BE8e8b0Cf70aE3E24e635dBC514" as `0x${string}`;
+        const beneficiaryUserID = [
+            BigInt("0x115b67fef6957d3ea9ba60dcb906e5ea796d9b2d725b65f0ec83dac6e6d0aef5") 
+        ];
+        console.log("Setting Mock-Data");
         
         try {
-            // Call setScope function directly on the contract
-            const tx = await contract.write.setScope([BigInt(newScope)]);
+            // Call addBeneficiaryData function with address and uint256[] array parameters
+            const tx = await contract.write.addBeneficiaryData([ascendAddress, beneficiaryUserID]);
             console.log("Transaction hash:", tx);
 
             // Wait for transaction confirmation
@@ -57,14 +60,18 @@ async function main(): Promise<void> {
             const receipt = await publicClient.waitForTransactionReceipt({ hash: tx });
             console.log("Transaction confirmed in block:", receipt.blockNumber.toString());
 
-            // Verify the scope was updated
-            const updatedScope = await contract.read.scope();
-            console.log("Updated scope:", updatedScope.toString());
+            // Add a small delay to ensure state is fully updated
+            console.log("Waiting for state to update...");
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
 
-            console.log("\nScope update complete!");
+            // Verify the beneficiary data was added
+            const updatedBeneficiaryData = await contract.read.getBeneficiaryData([ascendAddress]);
+            console.log("Updated beneficiary data:", JSON.stringify(updatedBeneficiaryData, (key, value) =>
+                typeof value === 'bigint' ? value.toString() : value, 2
+            ));
 
         } catch (error: any) {
-            console.error("Failed to set scope:", error.message);
+            console.error("Failed to set mockData:", error.message);
             process.exit(1);
         }
 

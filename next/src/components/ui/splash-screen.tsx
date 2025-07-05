@@ -7,13 +7,12 @@ export const SplashScreen = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            router.push('/login');
-        }, 4200);
-
-        return () => {
-            clearTimeout(timeout);
-        };
+        // const timeout = setTimeout(() => {
+        //     router.push('/login');
+        // }, 4200);
+        // return () => {
+        //     clearTimeout(timeout);
+        // };
     }, [router]);
 
     return (

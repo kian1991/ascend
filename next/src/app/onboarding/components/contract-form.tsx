@@ -1,10 +1,11 @@
 'use client';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { DatePicker } from '@/components/ui/date-picker';
-import { Beneficiary } from '@/zod/schemas';
+import { Beneficiary, ETHAddress } from '@/zod/schemas';
 import { usePrivy } from '@privy-io/react-auth';
 import { ArrowLeft, ArrowRight, Heart, Trash2 } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { CheckInInterval, useAscent, useAscentRegistry } from '@/service/smart-contract';
 
 const MAX_STEPS = 5;
 
@@ -12,10 +13,11 @@ export function ContractForm() {
     const [currentStep, setCurrentStep] = useState(1);
     const containerRef = useRef<HTMLDivElement>(null);
     const { user } = usePrivy();
+    const { createAscent, isPending } = useAscentRegistry(); // Assuming useAscent is a custom hook for smart contract interactions
     const [formData, setFormData] = useState<{
         grantor: string;
         beneficiaries: Beneficiary[];
-        checkInInterval: 'SEVEN_DAYS' | 'THIRTY_DAYS' | 'SIXTY_DAYS';
+        checkInInterval: CheckInInterval;
     }>({
         grantor: '',
         beneficiaries: [
@@ -23,11 +25,26 @@ export function ContractForm() {
                 name: 'Kian',
                 lastName: 'Lütke',
                 birthdate: new Date('1991-02-21'),
-                wallet: '0x12345abcdef123456789abcdef1234567890'
+                wallet: '0x4a1db00CEF07772e38D0235A0341164Ec1D63C09'
+            },
+            {
+                name: 'Tim',
+                lastName: 'Sigl',
+                birthdate: new Date('1997-08-08'),
+                wallet: '0x06Ed05340de68Dd5BaF10Fc77e296b106De7b2ee'
             }
         ],
-        checkInInterval: 'SEVEN_DAYS'
+        checkInInterval: 2
     });
+
+    useEffect(() => {
+        if (user && user.wallet && user.wallet.address) {
+            setFormData((prev) => ({
+                ...prev,
+                grantor: user!.wallet!.address
+            }));
+        }
+    }, [user]);
 
     const handleNext = () => {
         setCurrentStep((prev) => {
@@ -41,8 +58,6 @@ export function ContractForm() {
             }
             return prev; // Prevent going beyond max steps
         });
-        // Logic for handling the next step in the onboarding process
-        console.log('Next step in onboarding');
     };
 
     const handleBack = () => {
@@ -57,13 +72,15 @@ export function ContractForm() {
             }
             return prev; // Prevent going below step 1
         });
-        // Logic for handling the back step in the onboarding process
-        console.log('Back step in onboarding');
     };
 
     const handleSubmit = () => {
-        // Logic for submitting the contract form
-        console.log('Contract form submitted');
+        console.log(formData);
+        createAscent(
+            formData.grantor as `0x${string}`, // Ensure grantor is a valid ETH address
+            formData.beneficiaries.map((b) => b.wallet as `0x${string}`),
+            formData.checkInInterval
+        );
     };
 
     return (
@@ -74,10 +91,12 @@ export function ContractForm() {
         >
             {/* <ScrollProgressBasic> */}
             <div className="h-screen flex flex-col items-center justify-center snap-start">
-                <p className="text-xl font-bold text-center max-w-48 mx-auto">Now its Time to add your beloved ones.</p>
+                <p className="text-3xl font-thin text-center max-w-48 mx-auto">
+                    Now its Time to add your beloved ones.
+                </p>
             </div>
             <div className="h-screen snap-start w-full flex flex-col px-8 py-12">
-                <h2 className="text-2xl font-bold">Your Beloved Ones:</h2>
+                <h2 className="text-3xl font-thin text-center">Your Beloved Ones</h2>
                 <BeneficiaryInput
                     onAdd={(beneficiary) => {
                         setFormData((prev) => {
@@ -114,37 +133,41 @@ export function ContractForm() {
                 </div>
             </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
-                <p className="text-xl font-bold text-center max-w-48 mx-auto">
-                    Next, set your personal <Heart className="inline fill-pink-400 stroke-accent animate-pulse" /> Beat
-                    interval.
+                <p className="text-3xl font-thin text-center max-w-48 mx-auto">
+                    Next, set your personal{' '}
+                    <Heart className="inline fill-pink-400 stroke-accent animate-pulse" size={28} /> beat interval.
                 </p>
             </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
-                <h3 className="text-2xl font-semibold">I want to chek-in every:</h3>
+                <h3 className="text-3xl font-thin">I want to chek-in every:</h3>
                 <select
                     className="select select-lg select-bordered w-24  font-mono my-12"
                     value={formData.checkInInterval}
                     onChange={(e) =>
                         setFormData((prev) => ({
                             ...prev,
-                            checkInInterval: e.target.value as 'SEVEN_DAYS' | 'THIRTY_DAYS' | 'SIXTY_DAYS'
+                            checkInInterval: +e.target.value as CheckInInterval
                         }))
                     }
                 >
-                    <option value="SEVEN_DAYS">7</option>
-                    <option value="THIRTY_DAYS" defaultChecked>
+                    <option value={CheckInInterval.SEVEN_DAYS}>7</option>
+                    <option value={CheckInInterval.FOURTEEN_DAYS}>14</option>
+                    <option value={CheckInInterval.THIRTY_DAYS} defaultChecked>
                         30
                     </option>
-                    <option value="SIXTY_DAYS">60</option>
+                    <option value={CheckInInterval.ONE_EIGHTY_DAYS}>180</option>
+                    <option value={CheckInInterval.THREE_SIXTY_FIVE_DAYS}>365</option>
                 </select>
 
-                <h3 className="text-2xl italic font-semibold">Days</h3>
+                <h3 className="text-3xl  font-thin">Days</h3>
             </div>
-            <div className="h-screen flex flex-col items-start justify-center snap-start px-8 py-12">
-                <h3 className="text-base-content text-2xl font-bold">Please, check your inputs carefully</h3>
+            <div className="h-screen flex flex-col justify-center snap-start px-8 py-12">
+                <h3 className="text-base-content text-3xl font-thin text-center">
+                    Please, check your inputs carefully
+                </h3>
                 <div className="mt-8 w-full flex flex-col gap-1">
                     <h4 className="text-lg font-semibold">Your Address:</h4>
-                    <span className="badge badge-outline px-2 font-mono">{user?.wallet?.address || 'Not set'}</span>
+                    <span className="badge badge-soft px-2 font-mono">{formData.grantor || 'Not set'}</span>
 
                     <h4 className="text-lg font-semibold mt-6">Beneficiaries:</h4>
                     <div className="">
@@ -158,32 +181,51 @@ export function ContractForm() {
                     </div>
                     <h4 className="text-lg font-semibold mt-6">Check-in Interval:</h4>
                     <p className="text-base-content">
-                        {formData.checkInInterval === 'SEVEN_DAYS'
+                        {formData.checkInInterval === CheckInInterval.SEVEN_DAYS
                             ? 'Every 7 days'
-                            : formData.checkInInterval === 'THIRTY_DAYS'
+                            : formData.checkInInterval === CheckInInterval.FOURTEEN_DAYS
+                            ? 'Every 14 days'
+                            : formData.checkInInterval === CheckInInterval.THIRTY_DAYS
                             ? 'Every 30 days'
-                            : 'Every 60 days'}
+                            : formData.checkInInterval === CheckInInterval.ONE_EIGHTY_DAYS
+                            ? 'Every 180 days'
+                            : formData.checkInInterval === CheckInInterval.THREE_SIXTY_FIVE_DAYS
+                            ? 'Every 365 days'
+                            : 'Not set'}
                     </p>
+                    <button
+                        disabled={isPending}
+                        className="btn btn-primary mt-6 w-full btn-lg"
+                        onClick={() => handleSubmit()}
+                    >
+                        <img src="/img/ascend.png" alt="Ascend Logo" className="inline h-6" />
+                    </button>
+                    <button
+                        disabled={isPending}
+                        className="btn btn-secondary mt-2 w-full btn-lg"
+                        onClick={() => handleBack()}
+                    >
+                        Go Back
+                    </button>
                 </div>
-                <button className="btn btn-primary mt-6 w-full btn-lg" onClick={handleSubmit}>
-                    Submit Contract
-                </button>
             </div>
 
             {/* CONTROLS */}
-            <div className="fixed w-full left-0 bottom-20 flex items-center justify-between z-20 px-12 py-4">
-                {currentStep > 1 ? (
-                    <button className="btn btn-xl btn-circle " onClick={handleBack}>
-                        <ArrowLeft />
-                    </button>
-                ) : (
-                    <div />
-                )}
+            {currentStep < MAX_STEPS && (
+                <div className="fixed w-full left-0 bottom-20 flex items-center justify-between z-20 px-12 py-4">
+                    {currentStep > 1 ? (
+                        <button className="btn btn-xl btn-circle " onClick={handleBack}>
+                            <ArrowLeft />
+                        </button>
+                    ) : (
+                        <div />
+                    )}
 
-                <button className="btn btn-xl btn-circle" onClick={handleNext}>
-                    <ArrowRight />
-                </button>
-            </div>
+                    <button className="btn btn-xl btn-circle" onClick={handleNext}>
+                        <ArrowRight />
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
