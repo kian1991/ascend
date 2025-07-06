@@ -1,10 +1,6 @@
-import {
-  NexusSDK,
-  type UserAsset,
-  BridgeAndExecuteResult,
-} from '@avail-project/nexus';
+import { NexusSDK } from '@avail-project/nexus';
 
-let nexusClient: null | any = null;
+let nexusClient: NexusSDK | null = null;
 
 export const getInstance = async () => {
   if (!nexusClient) {
