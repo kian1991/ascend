@@ -45,9 +45,14 @@ export function ValidateBeneficiaries({
 
     // Use useEffect to ensure code only executes on the client side and reinitialize when beneficiary changes
     useEffect(() => {
+        setUserId(grantorWallet)
+
+        if (!userId || userId === ethers.ZeroAddress) {
+            return;
+        }
+ 
         try {
             // Use current beneficiary's wallet address if available, otherwise use default
-            setUserId(grantorWallet);
             const app = new SelfAppBuilder({
                 version: 2,
                 appName: 'Ascend',
@@ -70,7 +75,7 @@ export function ValidateBeneficiaries({
         } catch (error) {
             console.error('Failed to initialize Self app:', error);
         }
-    }, [currentBeneficiaryIndex]); // Reinitialize when beneficiary changes
+    }, [currentBeneficiaryIndex, userId, grantorWallet]); // Reinitialize when beneficiary changes
 
     const copyToClipboard = () => {
         if (!universalLink) return;
@@ -156,7 +161,7 @@ export function ValidateBeneficiaries({
                 {/* Summary Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-success mb-2">
-                        All Validations Complete! 🎉
+                        All Validations Complete!
                     </h1>
                     <p className="text-base-content/60">
                         {Object.values(validationResults).filter(Boolean).length} of {beneficiaries.length} beneficiaries validated successfully
@@ -188,9 +193,9 @@ export function ValidateBeneficiaries({
                                     </div>
                                     <div>
                                         {validationResults[index] ? (
-                                            <div className="badge badge-success">✅ Valid</div>
+                                            <div className="badge badge-success px-2">Valid</div>
                                         ) : (
-                                            <div className="badge badge-error">❌ Failed</div>
+                                            <div className="badge badge-error px-2">Failed</div>
                                         )}
                                     </div>
                                 </div>
@@ -254,16 +259,16 @@ export function ValidateBeneficiaries({
                                         </div>
                                         <div>
                                             {status === 'current' && (
-                                                <div className="badge badge-primary">Current</div>
+                                                <div className="badge badge-primary px-2">Current</div>
                                             )}
                                             {status === 'completed-success' && (
-                                                <span className="badge badge-success">✅ Valid</span>
+                                                <span className="badge badge-success px-2">Valid</span>
                                             )}
                                             {status === 'completed-failed' && (
-                                                <span className="text-error">❌ Failed</span>
+                                                <span className="text-error px-2">Failed</span>
                                             )}
                                             {status === 'pending' && (
-                                                <div className="badge badge-ghost">Pending</div>
+                                                <div className="badge badge-ghost px-2">Pending</div>
                                             )}
                                         </div>
                                     </div>
