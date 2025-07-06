@@ -148,7 +148,7 @@ export function ContractForm() {
                 </p>
             </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
-                <h3 className="text-3xl font-thin">I want to chek-in every:</h3>
+                <h3 className="text-3xl font-thin">I want to check-in every:</h3>
                 <select
                     className="select select-lg select-bordered w-24 font-mono my-12"
                     value={formData.checkInInterval}
