@@ -57,7 +57,7 @@ export function ValidateBeneficiaries({
                 userId: userId,
                 endpointType: 'staging_celo',
                 userIdType: 'hex', // use 'hex' for ethereum address or 'uuid' for uuidv4
-                userDefinedData: "Connect",
+                userDefinedData: 'Connect',
                 disclosures: {
                     // ofac: false,
                     // excludedCountries: [countries.BELGIUM],
@@ -150,58 +150,57 @@ export function ValidateBeneficiaries({
 
     // Show validation summary if all validations are complete
     if (showValidationSummary) {
-    return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-8">
-            <div className="w-full max-w-md">
-                {/* Summary Header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-success mb-2">
-                        All Validations Complete! 🎉
-                    </h1>
-                    <p className="text-base-content/60">
-                        {Object.values(validationResults).filter(Boolean).length} of {beneficiaries.length} beneficiaries validated successfully
-                    </p>
-                </div>
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-8">
+                <div className="w-full max-w-md">
+                    {/* Summary Header */}
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-bold text-success mb-2">All Validations Complete! 🎉</h1>
+                        <p className="text-base-content/60">
+                            {Object.values(validationResults).filter(Boolean).length} of {beneficiaries.length}{' '}
+                            beneficiaries validated successfully
+                        </p>
+                    </div>
 
-                {/* Results List */}
-                <div className="space-y-2 mb-8">
-                    {beneficiaries.map((beneficiary, index) => (
-                        <div
-                            key={index}
-                            className={`card bg-base-100 shadow-md border-2 transition-all ${
-                                validationResults[index]
-                                    ? 'border-success bg-success/10'
-                                    : 'border-error bg-error/10'
-                            }`}
-                        >
-                            <div className="card-body p-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="font-semibold">
-                                            {beneficiary.name} {beneficiary.lastName}
-                                        </h3>
-                                        {beneficiary.wallet && (
-                                            <p className="text-xs text-base-content/60 font-mono truncate max-w-[200px]">
-                                                {beneficiary.wallet}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        {validationResults[index] ? (
-                                            <div className="badge badge-success">✅ Valid</div>
-                                        ) : (
-                                            <div className="badge badge-error">❌ Failed</div>
-                                        )}
+                    {/* Results List */}
+                    <div className="space-y-2 mb-8">
+                        {beneficiaries.map((beneficiary, index) => (
+                            <div
+                                key={index}
+                                className={`card bg-base-100 shadow-md border-2 transition-all ${
+                                    validationResults[index]
+                                        ? 'border-success bg-success/10'
+                                        : 'border-error bg-error/10'
+                                }`}
+                            >
+                                <div className="card-body p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="font-semibold">
+                                                {beneficiary.name} {beneficiary.lastName}
+                                            </h3>
+                                            {beneficiary.wallet && (
+                                                <p className="text-xs text-base-content/60 font-mono truncate max-w-[200px]">
+                                                    {beneficiary.wallet}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            {validationResults[index] ? (
+                                                <div className="badge badge-success">✅ Valid</div>
+                                            ) : (
+                                                <div className="badge badge-error">❌ Failed</div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8">
@@ -216,9 +215,9 @@ export function ValidateBeneficiaries({
                             {Math.round((currentBeneficiaryIndex / beneficiaries.length) * 100)}% Complete
                         </span>
                     </div>
-                    <progress 
-                        className="progress progress-primary w-full" 
-                        value={currentBeneficiaryIndex} 
+                    <progress
+                        className="progress progress-primary w-full"
+                        value={currentBeneficiaryIndex}
                         max={beneficiaries.length}
                     ></progress>
                 </div>
@@ -254,16 +253,16 @@ export function ValidateBeneficiaries({
                                         </div>
                                         <div>
                                             {status === 'current' && (
-                                                <div className="badge badge-primary">Current</div>
+                                                <div className="badge badge-primary px-2">Current</div>
                                             )}
                                             {status === 'completed-success' && (
-                                                <span className="badge badge-success">✅ Valid</span>
+                                                <span className="badge badge-success px-2">Valid</span>
                                             )}
                                             {status === 'completed-failed' && (
-                                                <span className="text-error">❌ Failed</span>
+                                                <span className="badge px-2 text-error-content bg-error">Failed</span>
                                             )}
                                             {status === 'pending' && (
-                                                <div className="badge badge-ghost">Pending</div>
+                                                <div className="badge badge-ghost px-2">Pending</div>
                                             )}
                                         </div>
                                     </div>
@@ -276,14 +275,7 @@ export function ValidateBeneficiaries({
                 {/* Current Beneficiary Validation */}
                 <div className="card bg-base-200 shadow-xl">
                     <div className="card-body text-center">
-                        <h1 className="card-title text-2xl justify-center mb-4">Validate ID</h1>
-                        <h2 className="text-xl mb-6">
-                            {currentBeneficiary.name} {currentBeneficiary.lastName}
-                        </h2>
-
-                        <div className="divider">Scan QR Code</div>
-
-                        <div className="flex justify-center mb-6">
+                        <div className="flex justify-center mb-3">
                             {selfApp ? (
                                 <SelfQRcodeWrapper
                                     selfApp={selfApp}
@@ -302,14 +294,14 @@ export function ValidateBeneficiaries({
                                 type="button"
                                 onClick={openSelfApp}
                                 disabled={!universalLink}
-                                className="btn btn-primary btn-wide"
+                                className="btn btn-primary w-full"
                             >
                                 Open Self App
                             </button>
                         </div>
 
                         {/* Navigation Controls */}
-                        <div className="flex gap-4 mt-6">
+                        <div className="flex gap-4">
                             <button
                                 onClick={() => {
                                     if (currentBeneficiaryIndex > 0) {

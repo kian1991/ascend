@@ -12,8 +12,11 @@
 } */
 
 /* disable scrollbar */
-html {
+*::-webkit-scrollbar {
     scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+    display: none;
 }
 
 @theme inline {
