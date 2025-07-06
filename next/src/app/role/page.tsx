@@ -3,6 +3,8 @@
 import { useAscentRegistryRead } from '@/service/smart-contract';
 import { usePrivy } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
+import Choice from '@/assets/choice.svg';
+import Image from 'next/image';
 
 export default function Role() {
     const { user } = usePrivy();
@@ -23,13 +25,15 @@ export default function Role() {
     }
 
     return (
-        <div className="grid place-items-center min-h-screen">
+        <div className="flex flex-col justify-center items-center min-h-screen">
+            <Image width={500} height={500} src={Choice} alt="Choice Illustration" className="inline h-48 mb-4" />
+
             <div className="flex flex-col gap-3">
-                <h3 className="tracking-tight font-thin text-3xl text-center mb-2">WHO ARE YOU?</h3>
-                <button className="btn btn-xl btn-outline uppercase" onClick={handleGrantorClick}>
+                <h3 className="tracking-tight font-semibold text-3xl text-center mb-2">Who are you?</h3>
+                <button className="btn btn-xl btn-soft uppercase" onClick={handleGrantorClick}>
                     GRANTOR
                 </button>
-                <button className="btn btn-xl btn-outline uppercase" onClick={handleBeneficiaryClick}>
+                <button className="btn btn-xl btn-soft uppercase" onClick={handleBeneficiaryClick}>
                     BENEFICIARY
                 </button>
             </div>

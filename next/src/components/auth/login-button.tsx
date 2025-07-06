@@ -19,10 +19,8 @@ export const LoginButton = () => {
                 <img src="/img/ascend.png" alt="Ascend Logo" className="w-64 mb-4" />
                 <span className="text-muted-foreground font-bold text-center mb-4">Better Safe Than Sorry.</span>
             </div>
-            <p className="text-center mb-6">
-                Join us in revolutionizing the way we manage contracts and relationships.
-            </p>
-            <button className="btn btn-xl btn-outline  uppercase" onClick={() => login()}>
+            <p className="text-center mb-6">It can be easy to secure your assets. Forever.</p>
+            <button className="btn btn-xl btn-soft  uppercase" onClick={() => login()}>
                 BE PART OF IT
             </button>
         </div>

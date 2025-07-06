@@ -7,13 +7,16 @@
     themes: light --default, pastel;
 }
 
-/* nextjs-portal {
+nextjs-portal {
     display: none;
-} */
+}
 
 /* disable scrollbar */
-html {
+*::-webkit-scrollbar {
     scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+    display: none;
 }
 
 @theme inline {
