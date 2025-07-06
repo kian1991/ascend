@@ -37,4 +37,9 @@ npx hardhat ignition deploy --network alfajores ignition/modules/AscentModule.ts
 ```shell
 npx hardhat ignition deploy --network sepolia ignition/modules/AscentModule.ts
 ```
+### Verify contracts on etherscan
 
+```shell
+npx hardhat keystore set SEPOLIA_PRIVATE_KEY 
+```
+PCKWEP58XW8UI8C74RDF7I9ZXER27UUTXU

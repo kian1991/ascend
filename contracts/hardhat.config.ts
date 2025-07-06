@@ -3,6 +3,8 @@ import type { HardhatUserConfig } from 'hardhat/config';
 import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
 import { configVariable } from 'hardhat/config';
 
+const ETHERSCAN_API_KEY = vars.get("ETHERSCAN_API_KEY");
+
 const config: HardhatUserConfig = {
   /*
    * In Hardhat 3, plugins are defined as part of the Hardhat config instead of
@@ -11,6 +13,11 @@ const config: HardhatUserConfig = {
    * Note: A `hardhat-toolbox` like plugin for Hardhat 3 hasn't been defined yet,
    * so this list is larger than what you would normally have.
    */
+verify: {
+  etherscan: {
+    apiKey: 
+  }
+}
   plugins: [hardhatToolboxViemPlugin],
   solidity: {
     /*
@@ -77,6 +84,7 @@ const config: HardhatUserConfig = {
       chainType: 'l1',
       url: 'https://sepolia.base.org',
       accounts: [configVariable('SEPOLIA_PRIVATE_KEY')],
+
     },
     alfajores: {
       type: 'http',
