@@ -23,9 +23,9 @@ export function Providers(props: { children: ReactNode }) {
             }}
         >
             <WagmiProvider config={config}>
-                <NexusProvider config={{ network: 'testnet' }}>
-                    <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
-                </NexusProvider>
+                {/* <NexusProvider config={{ network: 'testnet' }}> */}
+                <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+                {/* </NexusProvider> */}
             </WagmiProvider>
         </PrivyProvider>
     );

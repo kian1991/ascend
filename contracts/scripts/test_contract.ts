@@ -19,10 +19,10 @@ interface GenericDiscloseOutputV2 {
     ofac: [boolean, boolean, boolean];
 }
 
-function createEmptyOutputWithNullifier(nullifierValue: bigint): GenericDiscloseOutputV2 {
+function createEmptyOutputWithNullifier(nullifierValue: bigint, userIdentifier: bigint): GenericDiscloseOutputV2 {
     return {
         attestationId: "0x0000000000000000000000000000000000000000000000000000000000000000",
-        userIdentifier: 0n,
+        userIdentifier: userIdentifier,
         nullifier: nullifierValue,
         forbiddenCountriesListPacked: [0n, 0n, 0n, 0n],
         issuingState: "",
@@ -35,6 +35,16 @@ function createEmptyOutputWithNullifier(nullifierValue: bigint): GenericDisclose
         olderThan: 0n,
         ofac: [false, false, false]
     };
+}
+
+export enum CaseType {
+  CONNECT = 1,
+  VERIFY = 2
+}
+
+export function createUserData(caseType: CaseType): `0x${string}` {
+  // Combine: 1 byte case + 20 bytes address
+  return `0x0${caseType}` as `0x${string}`;
 }
 
 async function main(): Promise<void> {
@@ -77,9 +87,18 @@ async function main(): Promise<void> {
         console.log("Contract instance read successfully");
         
         try {
+            function stringToHexBytes(str: string): `0x${string}` {
+                return `0x${Array.from(new TextEncoder().encode(str))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('')}`;
+            }
+
+            // Usage
+            const userData = stringToHexBytes("Connect");
+
             const nullifierValue = BigInt("0x115b67fef6957d3ea9ba60dcb906e5ea796d9b2d725b65f0ec83dac6e6d0aef5");
-            const emptyOutput = createEmptyOutputWithNullifier(nullifierValue);
-            const userData = `0xa783Dd4f1Aaa4BE8e8b0Cf70aE3E24e635dBC514` as const;
+            const userIdentifier = BigInt("0xa783Dd4f1Aaa4BE8e8b0Cf70aE3E24e635dBC514");
+            const emptyOutput = createEmptyOutputWithNullifier(nullifierValue, userIdentifier);
 
             // Call addBeneficiaryData function with address and uint256[] array parameters
             const tx = await contract.write.testCustomVerification([emptyOutput, userData]);
