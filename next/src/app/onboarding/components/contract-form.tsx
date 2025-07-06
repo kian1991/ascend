@@ -33,12 +33,12 @@ export function ContractForm() {
                 name: 'Kian',
                 lastName: 'Lütke',
                 wallet: '0x4a1db00CEF07772e38D0235A0341164Ec1D63C09'
-            },
-            {
-                name: 'Tim',
-                lastName: 'Sigl',
-                wallet: '0x06Ed05340de68Dd5BaF10Fc77e296b106De7b2ee'
             }
+            // {
+            //     name: 'Tim',
+            //     lastName: 'Sigl',
+            //     wallet: '0x06Ed05340de68Dd5BaF10Fc77e296b106De7b2ee'
+            // }
         ],
         checkInInterval: 2
     });
@@ -87,9 +87,6 @@ export function ContractForm() {
             formData.beneficiaries.map((b) => b.wallet as `0x${string}`),
             formData.checkInInterval
         );
-        setTimeout(() => {
-            push('/consolidate');
-        }, 4500);
     };
 
     return (
@@ -163,7 +160,7 @@ export function ContractForm() {
                 </p>
             </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
-                <h3 className="text-3xl font-thin">I want to check-in every:</h3>
+                <h3 className="text-3xl font-bold">I want to check-in every:</h3>
                 <select
                     className="select select-lg select-bordered w-24 font-mono my-12"
                     value={formData.checkInInterval}
@@ -183,7 +180,7 @@ export function ContractForm() {
                     <option value={CheckInInterval.THREE_SIXTY_FIVE_DAYS}>365</option>
                 </select>
 
-                <h3 className="text-3xl font-thin">Days</h3>
+                <h3 className="text-3xl font-bold">Days</h3>
             </div>
             <div className="h-screen flex flex-col items-center justify-center snap-start">
                 <Image
@@ -216,7 +213,7 @@ export function ContractForm() {
                         </span>
                     </div>
 
-                    <h4 className="text-lg font-semibold mt-6">Beneficiaries:</h4>
+                    <h4 className="text-lg font-semibold text-center mt-6">Beneficiaries:</h4>
                     <div className="">
                         {formData.beneficiaries.length > 0 ? (
                             formData.beneficiaries.map((beneficiary, index) => (

@@ -7,9 +7,9 @@
     themes: light --default, pastel;
 }
 
-/* nextjs-portal {
+nextjs-portal {
     display: none;
-} */
+}
 
 /* disable scrollbar */
 *::-webkit-scrollbar {

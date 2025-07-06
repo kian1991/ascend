@@ -20,7 +20,7 @@ export const LoginButton = () => {
                 <span className="text-muted-foreground font-bold text-center mb-4">Better Safe Than Sorry.</span>
             </div>
             <p className="text-center mb-6">It can be easy to secure your assets. Forever.</p>
-            <button className="btn btn-xl btn-outline  uppercase" onClick={() => login()}>
+            <button className="btn btn-xl btn-soft  uppercase" onClick={() => login()}>
                 BE PART OF IT
             </button>
         </div>

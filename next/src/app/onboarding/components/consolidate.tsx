@@ -13,7 +13,7 @@ export function Consolidate({ balance }: { balance?: string }) {
     const { wallets } = useWallets();
     const { ready, user } = usePrivy();
     const { useAscentsByGrantor } = useAscentRegistryRead();
-    const [consolidating, setConsolidating] = useState(true);
+    const [consolidating, setConsolidating] = useState(false);
     const [done, setDone] = useState(true);
     const { data: contracts, isLoading } = useAscentsByGrantor(user?.wallet?.address as `0x${string}`);
     const contractsArray = Array.isArray(contracts) ? contracts : [];
@@ -61,7 +61,7 @@ export function Consolidate({ balance }: { balance?: string }) {
 
     return (
         <>
-            <img src={'/img/ascend.png'} alt="Ascend Logo" className="w-full mb-4" />
+            <img src={'/img/ascend.png'} alt="Ascend Logo" className="w-48 mb-4" />
             <button
                 className="btn btn-outline btn-lg"
                 onClick={() => {
