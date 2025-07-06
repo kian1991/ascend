@@ -45,9 +45,14 @@ export function ValidateBeneficiaries({
 
     // Use useEffect to ensure code only executes on the client side and reinitialize when beneficiary changes
     useEffect(() => {
+        setUserId(grantorWallet)
+
+        if (!userId || userId === ethers.ZeroAddress) {
+            return;
+        }
+ 
         try {
             // Use current beneficiary's wallet address if available, otherwise use default
-            setUserId(grantorWallet);
             const app = new SelfAppBuilder({
                 version: 2,
                 appName: 'Ascend',
@@ -70,7 +75,7 @@ export function ValidateBeneficiaries({
         } catch (error) {
             console.error('Failed to initialize Self app:', error);
         }
-    }, [currentBeneficiaryIndex]); // Reinitialize when beneficiary changes
+    }, [currentBeneficiaryIndex, userId, grantorWallet]); // Reinitialize when beneficiary changes
 
     const copyToClipboard = () => {
         if (!universalLink) return;
@@ -150,57 +155,58 @@ export function ValidateBeneficiaries({
 
     // Show validation summary if all validations are complete
     if (showValidationSummary) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center p-8">
-                <div className="w-full max-w-md">
-                    {/* Summary Header */}
-                    <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-success mb-2">All Validations Complete! 🎉</h1>
-                        <p className="text-base-content/60">
-                            {Object.values(validationResults).filter(Boolean).length} of {beneficiaries.length}{' '}
-                            beneficiaries validated successfully
-                        </p>
-                    </div>
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-8">
+            <div className="w-full max-w-md">
+                {/* Summary Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-success mb-2">
+                        All Validations Complete!
+                    </h1>
+                    <p className="text-base-content/60">
+                        {Object.values(validationResults).filter(Boolean).length} of {beneficiaries.length} beneficiaries validated successfully
+                    </p>
+                </div>
 
-                    {/* Results List */}
-                    <div className="space-y-2 mb-8">
-                        {beneficiaries.map((beneficiary, index) => (
-                            <div
-                                key={index}
-                                className={`card bg-base-100 shadow-md border-2 transition-all ${
-                                    validationResults[index]
-                                        ? 'border-success bg-success/10'
-                                        : 'border-error bg-error/10'
-                                }`}
-                            >
-                                <div className="card-body p-4">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="font-semibold">
-                                                {beneficiary.name} {beneficiary.lastName}
-                                            </h3>
-                                            {beneficiary.wallet && (
-                                                <p className="text-xs text-base-content/60 font-mono truncate max-w-[200px]">
-                                                    {beneficiary.wallet}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div>
-                                            {validationResults[index] ? (
-                                                <div className="badge badge-success">✅ Valid</div>
-                                            ) : (
-                                                <div className="badge badge-error">❌ Failed</div>
-                                            )}
-                                        </div>
+                {/* Results List */}
+                <div className="space-y-2 mb-8">
+                    {beneficiaries.map((beneficiary, index) => (
+                        <div
+                            key={index}
+                            className={`card bg-base-100 shadow-md border-2 transition-all ${
+                                validationResults[index]
+                                    ? 'border-success bg-success/10'
+                                    : 'border-error bg-error/10'
+                            }`}
+                        >
+                            <div className="card-body p-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-semibold">
+                                            {beneficiary.name} {beneficiary.lastName}
+                                        </h3>
+                                        {beneficiary.wallet && (
+                                            <p className="text-xs text-base-content/60 font-mono truncate max-w-[200px]">
+                                                {beneficiary.wallet}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        {validationResults[index] ? (
+                                            <div className="badge badge-success px-2">Valid</div>
+                                        ) : (
+                                            <div className="badge badge-error px-2">Failed</div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                 </div>
             </div>
-        );
-    }
+        </div>
+    );
+}
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8">
@@ -254,14 +260,17 @@ export function ValidateBeneficiaries({
                                         <div>
                                             {status === 'current' && (
                                                 <div className="badge badge-primary px-2">Current</div>
+                                                <div className="badge badge-primary px-2">Current</div>
                                             )}
                                             {status === 'completed-success' && (
+                                                <span className="badge badge-success px-2">Valid</span>
                                                 <span className="badge badge-success px-2">Valid</span>
                                             )}
                                             {status === 'completed-failed' && (
                                                 <span className="badge px-2 text-error-content bg-error">Failed</span>
                                             )}
                                             {status === 'pending' && (
+                                                <div className="badge badge-ghost px-2">Pending</div>
                                                 <div className="badge badge-ghost px-2">Pending</div>
                                             )}
                                         </div>

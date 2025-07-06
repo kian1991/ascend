@@ -43,7 +43,7 @@ async function main(): Promise<void> {
         console.log("Contract instance read successfully");
 
         console.log("\nReady to set scope - contract interface is available!");
-        const newScope = "11556255109592982382176842212395241744016624474851638017514464905550112858911";
+        const newScope = "11232303686099886954859476558684289858569066383749890528552866674390476368324";
         console.log("Setting scope to:", newScope);
         
         try {
